@@ -1,0 +1,85 @@
+{% extends "products/base.html" %}
+
+{% block content %}
+<div class="filter-section">
+    <form method="get">
+        <h2>Search & Filter: </h2>
+        
+        <!-- Search by name or description -->
+        <div class="form-group">
+            <label for="search">Search:</label>
+            <input type="text" id="search" name="search" value="{{ request.GET.search }}" 
+                   placeholder="Enter product name">
+        </div>
+        
+        <!-- Categories filter -->
+        <div class="form-group">
+            <label for="category">Select category:</label>
+            <select id="category" name="category">
+                <option value="">All</option>
+                {% for category in categories %}
+                    <option value="{{ category.slug }}" 
+                            {% if request.GET.category == category.slug %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!-- Tags filter -->
+        <div class="form-group">
+            <label>Tags:</label>
+            <div class="tag-options">
+                {% for tag in tags %}
+                    <div class="tag-option">
+                        <input type="checkbox" id="tag-{{ tag.slug }}" name="tags" 
+                               value="{{ tag.slug }}" 
+                               {% if tag.slug in selected_tags %}checked{% endif %}>
+                        <label for="tag-{{ tag.slug }}">{{ tag.name }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="filter-button">Search</button>
+        </div>
+    </form>
+</div>
+
+<div class="product-list">
+    <h2>Products ({{ products.count }})</h2>
+    
+    {% if products %}
+        <div class="products-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    <h3><a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a></h3>
+                    <p class="description">{{ product.description|truncatechars:100 }}</p>
+                    <p class="price">${{ product.price }}</p>
+                    <p class="stock">{% if product.stock > 0 %}{{ product.stock }} in stock{% else %}Out of stock{% endif %}</p>
+                    
+                    <div class="categories">
+                        <strong>Categories:</strong>
+                        {% for category in product.categories.all %}
+                            <span class="category-badge">{{ category.name }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="tags">
+                        {% for tag in product.tags.all %}
+                            <span class="tag">{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+               
+    {% else %}
+        <div class="no-results">
+            <p>No products found matching your criteria.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
